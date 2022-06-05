@@ -1,5 +1,6 @@
 import { getInput, info, setFailed, setOutput } from "@actions/core";
 import { getOctokit } from "@actions/github";
+import dateFormat, { masks } from "dateformat";
 import { dateDiff, calcTimeUnits } from "./dateutils.js";
 
 async function run() {
@@ -14,23 +15,15 @@ async function run() {
 
     const numDaysOldToBeDeleted = Number(days_old || 7);
     var filterDate = new Date();
-    info(`today:  ${filterDate}`);
+    info(`today:  ${dateFormat(filterDate, "yyyy-mm-dd")}`);
     filterDate.setDate(filterDate.getDate() - numDaysOldToBeDeleted)
-    info(`search: ${filterDate}`);
+    info(`search: ${dateFormat(filterDate, "yyyy-mm-dd")}`);
 
     /**
      * https://octokit.github.io/rest.js/v18
      **/
     const octokit = new getOctokit(token);
 
-    /**
-     * We need to fetch the list of workflow runs for a particular repo.
-     * We use octokit.paginate() to automatically loop over all the pages of the results.
-     */
-    // const workflows = await octokit.paginate(
-    //   "GET /repos/:owner/:repo/actions/workflows",
-    //   defaults
-    // );
     octokit.paginate(octokit.rest.actions.listWorkflowRunsForRepo,
       {
         owner,
@@ -40,16 +33,8 @@ async function run() {
       }
     ).then((data) => {
       info(`total of ${data.length} workflows found`);
-/*
-      const hasRunBeforeDate = (run) => {
-        const diff = dateDiff(run.updated_at, Date.now());
-        return calcTimeUnits(diff).days >= numDaysOldToBeDeleted;
-      };
-
-      const workflowRunsToDelete = data.workflow_runs.filter( );
-
       info(`${workflowRunsToDelete.length} workflow runs to be deleted`);
-  */
+
     });
 /*
     if (workflowRunsToDelete.length > 0) {
