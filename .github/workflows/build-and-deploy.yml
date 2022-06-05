@@ -1,0 +1,38 @@
+# `dist/index.js` is a special file in Actions.
+# When you reference an action with `uses:` in a workflow,
+# `index.js` is the code that will run.
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - irkode
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Node.js 17.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 17.x
+
+      - name: Install Build
+        run: |
+          npm ci
+          npm run build --if-present
+
+      - name: Deploy
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
