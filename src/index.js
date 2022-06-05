@@ -13,6 +13,10 @@ async function run() {
     });
 
     const numDaysOldToBeDeleted = Number(days_old || 7);
+    var filterDate = new Date();
+    info(`today:  ${filterDate}`);
+    filterDate.setDate(filterDate.getDate() - numDaysOldToBeDeleted)
+    info(`search: ${filterDate}`);
 
     /**
      * https://octokit.github.io/rest.js/v18
@@ -36,15 +40,16 @@ async function run() {
       }
     ).then((data) => {
       info(`total of ${data.length} workflows found`);
-
+/*
       const hasRunBeforeDate = (run) => {
         const diff = dateDiff(run.updated_at, Date.now());
         return calcTimeUnits(diff).days >= numDaysOldToBeDeleted;
       };
 
-      const workflowRunsToDelete = data.workflow_runs.filter(hasRunBeforeDate);
+      const workflowRunsToDelete = data.workflow_runs.filter( );
 
       info(`${workflowRunsToDelete.length} workflow runs to be deleted`);
+  */
     });
 /*
     if (workflowRunsToDelete.length > 0) {
