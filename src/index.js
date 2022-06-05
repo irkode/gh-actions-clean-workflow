@@ -27,23 +27,25 @@ async function run() {
     //   "GET /repos/:owner/:repo/actions/workflows",
     //   defaults
     // );
-    const { data } = await octokit.rest.actions.listWorkflowRunsForRepo({
+    octokit.paginate(octokit.rest.actions.listWorkflowRunsForRepo,
+      {
         owner,
         repo,
         status: "completed",
-        per_page: 100,
-      });
+        per_page: 10,
+      }
+    ).then((data) => {
+      info(`total of ${data.length} workflows found`);
 
-    info(`total of ${data.length} workflows found`);
+      const hasRunBeforeDate = (run) => {
+        const diff = dateDiff(run.updated_at, Date.now());
+        return calcTimeUnits(diff).days >= numDaysOldToBeDeleted;
+      };
 
-    const hasRunBeforeDate = (run) => {
-      const diff = dateDiff(run.updated_at, Date.now());
-      return calcTimeUnits(diff).days >= numDaysOldToBeDeleted;
-    };
+      const workflowRunsToDelete = data.workflow_runs.filter(hasRunBeforeDate);
 
-    const workflowRunsToDelete = data.workflow_runs.filter(hasRunBeforeDate);
-
-    info(`${workflowRunsToDelete.length} workflow runs to be deleted`);
+      info(`${workflowRunsToDelete.length} workflow runs to be deleted`);
+    });
 /*
     if (workflowRunsToDelete.length > 0) {
       info(`${requests.length} workflow runs successfully deleted`);
