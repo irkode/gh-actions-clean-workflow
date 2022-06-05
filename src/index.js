@@ -28,11 +28,13 @@ async function run() {
     //   defaults
     // );
     const { data } = await octokit.rest.actions.listWorkflowRunsForRepo({
-      owner,
-      repo,
-      status: "completed",
-      per_page: 100,
-    });
+        owner,
+        repo,
+        status: "completed",
+        per_page: 10,
+      });
+
+    info(`total of ${data.length} workflows found`);
 
     const hasRunBeforeDate = (run) => {
       const diff = dateDiff(run.updated_at, Date.now());
@@ -42,30 +44,30 @@ async function run() {
     const workflowRunsToDelete = data.workflow_runs.filter(hasRunBeforeDate);
 
     info(`${workflowRunsToDelete.length} workflow runs to be deleted`);
-
+/*
     if (workflowRunsToDelete.length > 0) {
-      /**
-       * Loop over all the WorkflowRuns and delete them.
-       **/
+      info(`${requests.length} workflow runs successfully deleted`);
+
       const deleteRunAction = ({ id }) => {
         info(`Deleting workflow run #${id}`);
 
         return octokit.rest.actions
           .deleteWorkflowRun({ owner, repo, run_id: id })
-          .catch((err) => `An error occurrend: ${err.message}`);
+          .catch((err) => `An error occurred: ${err.message}`);
       };
 
       const requests = await Promise.all(
         workflowRunsToDelete.map(deleteRunAction)
       );
 
-      info(`${requests.length} workflow runs sucessfully deleted`);
+      info(`${requests.length} workflow runs successfully deleted`);
 
       setOutput(
         "result",
-        `${requests.length} workflow runs sucessfully deleted`
+        `${requests.length} workflow runs successfully deleted`
       );
     }
+*/
   } catch (error) {
     setFailed(error.message);
   }
